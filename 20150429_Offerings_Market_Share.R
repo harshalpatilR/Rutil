@@ -1,11 +1,47 @@
 source("20150404_Harshal_R_Functions.R")
+require(plyr)
 
 ### Gartner Market-Share
 g.df <- rcsv("Software_Marketshare_All_2015Q1.CSV")
 
+### DDPLY function
+gartner_share1 <- function(x){
+    ##x<-g.df
+    ### Margins will add last row as sum of all
+    t1 <- cast(x, Vendor~Year,fun=sum,margins=c("grand_row"),value=.(Revenue..M....USD))
+    #### Build percentages - each/last row
+    t2 <- data.frame(lapply(t1,function(x){x/x[length(x)]}))
+    t3 <- cbind(t1,t2)
+    return(t3)
+}
+
+### Granular Subsegment
+test.df <- ddply(g.df,.(Country,SubSegment),gartner_share1)
+names(test.df)
+
+### Market Level
+test2.df <- ddply(g.df,.(Country,Market),gartner_share1)
+names(test2.df)
+
+### Diff is one field
+setdiff(names(test.df),names(test2.df))
+setdiff(names(test2.df),names(test.df))
+
+### slightly incorrect naming but who cares
+names(test2.df) <- names(test.df)
+test.df <- rbind(test.df,test2.df)
+unique(test.df[,2])
+
 ### Mapping
 map.df <- rcsv("Gartner_Offerings_Mapping.csv")
+map.df$seq <- row.names(map.df)
 
+x<-merge(map.df,test.df,by.x="Gartner_Market_Share_Segment_P",by.y="SubSegment")
+wcsv(x,"Share.csv")
+### Error in column
+x2<-merge(map.df,test.df,by.x="Gartner_Market_Share_Segment_S",by.y="SubSegment")
+
+##############################################################################################
 ### Validate the below is correct
 names(g.df)
 
