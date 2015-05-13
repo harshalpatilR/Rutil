@@ -108,17 +108,34 @@ rbind.match.columns <- function(input1, input2) {
   return(rbind(input1[, column.names], input2[, column.names]))
 }
 
-rbind.all.columns <- function(x, y) {
-  
-  #### PRESENT in first & NOT in second
-  x.diff <- setdiff(colnames(x), colnames(y))
-  y.diff <- setdiff(colnames(y), colnames(x))
-  
-  x[, c(as.character(y.diff))] <- NA
-  
-  y[, c(as.character(x.diff))] <- NA
-  
-  return(rbind(x, y))
+rbind.all.columns <- function(...) {
+    z <- data.frame()
+    if(nargs()>=2)
+    {
+        largs <- list(...)
+        for(i in 1:(nargs()-1)){
+            if(i==1){
+                x <- largs[[i]]
+                y <- largs[[i+1]]
+            }
+            else
+            {
+                x <- z
+                y <- largs[[i+1]]
+            }
+            #debug()
+            #### PRESENT in first & NOT in second
+            x.diff <- setdiff(colnames(x), colnames(y))
+            y.diff <- setdiff(colnames(y), colnames(x))
+            
+            x[, c(as.character(y.diff))] <- NA
+            y[, c(as.character(x.diff))] <- NA
+            
+            z <- rbind(x, y)
+        }
+    } 
+    
+return(z)
 }
 
 
