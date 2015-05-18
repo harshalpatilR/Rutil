@@ -596,11 +596,17 @@ cluster_docs <- function(srcvec, nocluster=30, stem=F, toplaintext=F,
     ##inspect(dtm)
     ##dtm
     
-    if(sparsethr>=0){
-        ##### REDUCE terms counts
-        dtm <- removeSparseTerms(dtm,sparsethr)
+    if(sparsethr>0){
+        ##### REDUCE terms counts - atleast 2 documents 
+        dtm <- removeSparseTerms(dtm,1-(2/length(srcvec)))
         ###dtm
     }
+    #### REMOE TOP 10 most frequent words - noise
+    total_tf <- apply(dtm,2,function(x){sum(x)})
+    total_tf <- sort(total_tf,decreasing=T)
+    skills <- tm_map(skills,removeWords,total_tf[1:10])
+    dtm <- DocumentTermMatrix(skills)
+    
     ####### INSPECT
     ##findFreqTerms(dtm, 5)
     ##assoc <- data.frame(unlist(findAssocs(dtm, c("software","solution","based"), .05)))
