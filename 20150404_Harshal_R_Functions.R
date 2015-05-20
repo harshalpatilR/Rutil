@@ -771,3 +771,25 @@ chk_match_pct <- function(m.df,what,nseq){
     pct <- sum(!is.na(m.df[,px("match",what,nseq)]))/nrow(m.df)
     return(pct*100)
 }
+
+
+
+#### GENERIC function - DOES NOT WORK w DUPLICATES - USE MERGE
+#### sdf source 
+#### lkdf lookup source
+#### scol - format (source) - scaler
+#### lkcol - format (source, destination) - vector
+#### sfmapname - name of mapped field in source df
+map_field <- function(sdf,lkdf,scol,lkcol,sfmapname)
+{
+    lktable <- unique(lkdf[,lkcol])
+    mv <- match(sdf[,scol],lkdf[,lkcol[1]]) 
+    sdf[,sfmapname] <- lktable[mv,lkcol[2]]
+    
+    return(sdf)
+}
+
+
+
+
+
