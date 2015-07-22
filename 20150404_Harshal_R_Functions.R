@@ -790,6 +790,56 @@ map_field <- function(sdf,lkdf,scol,lkcol,sfmapname)
 }
 
 
+##### READ CSVs in DataTables
+combine.csvs.dt <- function(path,pattern,add_name=T,allchar=F,...){
+    
+    ### For each path - append files matching all patterns
+    tflist <- c()
+    for(cpath in path){
+        for(cpattern in pattern){
+            flist <- list.files(cpath,cpattern,ignore.case=T,recursive=T,include.dirs=F,no..=T,all.files=T,full.names=T)
+            tflist<- c(tflist,flist)
+        }
+    }
+    
+    ### List of files from ALL paths matching ALL patterns
+    ### read and append together
+    fdt <- data.table()
+    for(cfile in tflist){
+        
+        ###cfile <- tflist[1]
+        test <- fread(cfile,...)
+        if(allchar){
+            colclass <- rep("character",ncol(test))    
+        }
+        test<-fread(cfile,colClasses=colclass,...)
+        
+        if(add_name){
+            test[,"fname"] = cfile
+        }
+        
+        a<-names(test)
+        b<-names(fdt)
+        add_b <- setdiff(a,b)
+        add_a <- setdiff(b,a)
+        
+        ### add to B
+        if(nrow(fdt)>0 & length(add_b)>0){
+            fdt[,add_b] = NA
+        }
+        
+        ### add to A
+        if(nrow(test)>0 & length(add_a)>0){
+            test[,add_a] = NA
+        }
+        
+        fdt <- rbind(test,fdt)
+    }
+    
+    
+    return(fdt)
+}
+
 
 
 
