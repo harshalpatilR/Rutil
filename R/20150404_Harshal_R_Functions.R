@@ -848,7 +848,7 @@ combine.csvs.dt <- function(path,pattern,add_name=T,allchar=F,unmatched=F,rmform
     ### MAKE VALID NAMES
     namesv <- names(fdt)
     ### Valid Names in lowercase - remove duplicate "."s
-    setnames(fdt,namesv,gsub("\\.+",".",tolower(make.names(namesv,allow=F))))
+    setnames(fdt,namesv,gsub("\\.+",".",tolower(make.names(namesv,unique=T,allow=F))))
     
     #### REMOVE ,s added by excel formatting - so text to numeric can be done
     if(rmformat==T){
