@@ -187,3 +187,56 @@ matchmodel <- linuxmodel[vendor!="IBM",]
 
 match <- name_match_wtokens(s2,matchmodel,"product","sub.brand",tokens=3)
 match <- name_match_wtokens(s2,matchmodel,delim="|","product","brand",tokens=1)
+
+########################################################################
+# Fresh start
+##############
+f1 <- combine.csvs.dt("1h16 linuxone",".*csv",allchar=T)
+f1$order <- as.numeric(row.names(f1))
+f2 <- combine.csvs.dt("1h16 oracle install",".*csv",allchar=T)
+
+setnames(f2,"country","iso.country.code")
+setnames(f1,"duns.no","dunsnumber")
+
+f3 <- merge(f1,f2,all.x=T,by=c("iso.country.code","dunsnumber"))
+f4 <- f3[order(order),]
+wcsv(f4,"linux plus oracle.csv")
+
+## get 
+f5 <- combine.csvs.dt("1h16 power install",".*csv",allchar=T)
+f6 <- f5[,.N,by=.(cntry,cust.no,cust.name)]
+f5[cust.no=="00367335",]
+
+wcsv(f6,"power install.csv")
+###################################
+f7 <- combine.csvs.dt("1h16 power install w ids",".*csv",allchar=T)
+f7[duns.no=="<NULL>",]
+
+setnames(f7,"iso.cd","iso.country.code")
+setnames(f7,"duns.no","dunsnumber")
+
+f8 <- f7[,.N,by=.(iso.country.code,dunsnumber)]
+f8$power <- 1
+
+f9 <- merge(f4,f8,all.x=T,by=c("iso.country.code","dunsnumber"))
+wcsv(f9,"linux oracle power.csv")
+###################################
+
+f10 <- combine.csvs.dt("1h16 URNA duns",".*csv",allchar=T,add_name=F)
+f11 <- combine.csvs.dt("1h16 linuxone shared",".*csv",allchar=T,add_name=F)
+f11$rownames <- row.names(f11)
+
+names(f10)
+f12 <- f10[,.N,by=.(duns,linux.name,ctry,urn.acct)]
+setnames(f12,"ctry","iso.country.code")
+setnames(f12,"duns","dunsnumber")
+
+f13 <- merge(f11,f12,all.x=T,by=c("iso.country.code","dunsnumber"),allow.cartesian=TRUE)
+
+f14 <- combine.csvs.dt("1h16 contacts",".*csv",allchar=T,add_name=F)
+names(f14)
+setnames(f14,"mail.country","iso.country.code")
+
+f15 <- merge(f13,f14,all.x=T,by=c("iso.country.code","urn.acct"),allow.cartesian=TRUE)
+names(f15)
+wcsv(f15,"linux oracle power contacts.csv")
